@@ -3,6 +3,7 @@ import {connect} from 'react-redux'
 import DrawingCanvas from './canvas'
 import {red, blue, erasor, text} from '../actions/action'
 import Button from '@material-ui/core/Button';
+import Slider from '@material-ui/core/Button';
 class View extends Component{
     constructor(props){
         super(props)
@@ -52,6 +53,10 @@ class View extends Component{
                     </Button>
                     
                 </div>
+                <div>
+                    <Slider value = {50} aria-labelledby="continuous-slider" />
+                </div>
+                
                 <DrawingCanvas brushColor = {this.color} eraserColor = {this.props.erase} textarea = {this.props.textbox} actionperformed = {this.props.lastaction}/>
             </div>
             
