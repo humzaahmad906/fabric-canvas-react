@@ -7,6 +7,8 @@ export const TRIANGLE_ADDED = "TRIANGLE_ADDED"
 export const RECTANGLE_ADDED = "RECTANGLE_ADDED"
 export const CIRCLE_ADDED = "CIRCLE_ADDED"
 export const DOWNLOAD_ACTIVE = "DOWNLOAD_ACTIVE"
+export const UNDO = "UNDO"
+export const REDO = "REDO"
 //action creaters
 export const red = () => ({
     "type": ACTIVE_RED,
@@ -43,4 +45,10 @@ export const circle = () => ({
 })
 export const downloadcanvas = () => ({
     "type": DOWNLOAD_ACTIVE,
+})
+export const redo = () => ({
+    "type": REDO,
+})
+export const undo = () => ({
+    "type": UNDO,
 })

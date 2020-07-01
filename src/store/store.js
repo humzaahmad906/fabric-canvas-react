@@ -1,14 +1,17 @@
-import {ACTIVE_RED, ACTIVE_BLUE, ACTIVE_ERASER, TEXT_ADDED, RECTANGLE_ADDED, TRIANGLE_ADDED, CIRCLE_ADDED, DOWNLOAD_ACTIVE} from "../actions/action"
+import {ACTIVE_RED, ACTIVE_BLUE, ACTIVE_ERASER, TEXT_ADDED,
+        RECTANGLE_ADDED, TRIANGLE_ADDED, CIRCLE_ADDED,
+        DOWNLOAD_ACTIVE, UNDO, REDO} from "../actions/action"
 import {createStore, combineReducers} from 'redux'
 const DEFAULTSTATE = {
     "color": "BLUE",
     "erase": false,
     "textbox": "",
-    "lastAction": "color",
+    "lastAction": "",
     "rectangledimention": [],
     "triangledimention": [],
     "circleradius": null,
     "downloadjson": false,
+    "modification": []
 }
 const colorReducer = (state = "BLUE", action) => {
     console.log(action.type)
@@ -66,6 +69,17 @@ const downloadReducer = (state = false, action) => {
     }
     else return state
 }
+const undoredoReducer = (state = [], action) => {
+    switch(action.type){
+        case REDO:
+            return [...state, "redo"]
+        case UNDO:
+            return [...state, "undo"]
+        default:
+            return state
+    }
+}
+
 const reducer = combineReducers({
     "color": colorReducer,
     "erase": eraserReducer,
@@ -75,6 +89,7 @@ const reducer = combineReducers({
     "triangledimention": triangleReducer,
     "circleradius": circleReducer,
     "downloadjson": downloadReducer,
+    "modification":undoredoReducer,
 })
 const store = createStore(reducer, DEFAULTSTATE)
 export default store

@@ -1,10 +1,12 @@
 import React, {Component} from 'react'
 import {fabric} from 'fabric'
-import {ACTIVE_RED,ACTIVE_BLUE,ACTIVE_ERASER,TEXT_ADDED, RECTANGLE_ADDED, TRIANGLE_ADDED, CIRCLE_ADDED, DOWNLOAD_ACTIVE} from '../actions/action'
+import {ACTIVE_RED,ACTIVE_BLUE,ACTIVE_ERASER,TEXT_ADDED, RECTANGLE_ADDED, TRIANGLE_ADDED, CIRCLE_ADDED, DOWNLOAD_ACTIVE, UNDO, REDO} from '../actions/action'
 
 class DrawingCanvas extends Component{
     constructor(props){
         super(props)
+        this.canvasobjects = []
+        this.redopopulate = []
     }
     componentDidMount(){
         this.canvas = new fabric.Canvas('c',{
@@ -13,7 +15,18 @@ class DrawingCanvas extends Component{
             backgroundColor: "black",
             isDrawingMode: true,
         })
-        
+        this.canvas.on("object:added", (e)=>{
+            if ("id" in e.target){
+                console.log("redo")
+            }
+            else{
+                console.log(e.target)
+                e.target.id = Math.random()
+                this.canvasobjects.push(e.target)
+                console.log("called")
+            }
+            
+        })
         this.canvas.renderAll()
     }
     componentDidUpdate(prevProps){
@@ -60,6 +73,7 @@ class DrawingCanvas extends Component{
                     fill: '#'+this.three()
                 });
                 this.canvas.add(rectangle)
+                break
             case TRIANGLE_ADDED:
                 const triangle = new fabric.Triangle({ 
                     width: this.props.triangledim[0], 
@@ -69,6 +83,7 @@ class DrawingCanvas extends Component{
                     fill: '#'+this.three(),
                 });
                 this.canvas.add(triangle)
+                break
             case CIRCLE_ADDED:
                 const circle = new fabric.Circle({radius: 100,
                     fill: '#'+this.three(),
@@ -77,9 +92,48 @@ class DrawingCanvas extends Component{
                     top: 50, 
                 });
                 this.canvas.add(circle)
+                break
+            case UNDO:
+                console.log(this.canvasobjects.length)
+                if (this.canvasobjects.length != 0){
+                    let objectRemoved = this.canvasobjects[this.canvasobjects.length-1]
+                    this.canvasobjects = this.canvasobjects.splice(0,this.canvasobjects.length-1)
+                    console.log("all objects", this.canvasobjects)
+                    this.redopopulate.push(objectRemoved)
+                    let i
+                    for(i=0; i<this.canvas.getObjects().length; i++){
+                        if (i<this.canvasobjects.length){
+                            this.canvas.getObjects()[i] = this.canvasobjects[i]
+                        }
+                        else{
+                            this.canvas.remove(this.canvas.getObjects()[i])
+                        }
+                    }
+                    this.canvas.renderAll()
+                }
+                
+                // console.log("canvasobjects", this.canvasobjects)
+                // console.log("redo", this.redopopulate)
+                break
+            case REDO:
+                if (this.redopopulate.length!=0){
+                    let j
+                    console.log(this.canvasobjects.length)
+                    let objectAdded = this.redopopulate.pop()
+                    this.canvasobjects.push(objectAdded)
+                    console.log("all objects", this.canvasobjects)
+                    
+                    console.log("canvas objects", this.canvas.getObjects())
+                    for(j=this.canvas.getObjects().length; j<this.canvasobjects.length; j++){
+                        let obj = this.canvasobjects[j]
+                        this.canvas.add(obj)
+                    }
+                    }
+                
+                break
             default:
                 console.log(this.props.actionperformed)
-                
+                break
         }
         
     }

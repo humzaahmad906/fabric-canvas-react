@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import DrawingCanvas from './canvas'
-import {red, blue, erasor, text, circle, rectangle, triangle, downloadcanvas} from '../actions/action'
+import {red, blue, erasor, text, circle, rectangle, triangle, downloadcanvas, undo, redo} from '../actions/action'
 import Button from '@material-ui/core/Button';
 import Slider from '@material-ui/core/Button';
 class View extends Component{
@@ -38,6 +38,12 @@ class View extends Component{
         }
         this.downloadJson = () => {
             this.props.downloadcanvas()
+        }
+        this.undo = () => {
+            this.props.undo()
+        }
+        this.redo = () => {
+            this.props.redo()
         }
     }
     
@@ -76,6 +82,12 @@ class View extends Component{
                     <Button variant = "contained" onClick = {this.downloadJson}>
                         Download JSON
                     </Button>
+                    <Button variant = "contained" onClick = {this.undo}>
+                        Undo
+                    </Button>
+                    <Button variant = "contained" onClick = {this.redo}>
+                        Redo
+                    </Button>
                     
                 </div>
                 <div>
@@ -90,13 +102,14 @@ class View extends Component{
                  circleradius = {this.props.circleradius}
                  rectangledim = {this.props.rectangledimention}
                  triangledim = {this.props.triangledimention}
-                 jsondown = {this.props.canvasjson}/>
+                 jsondown = {this.props.canvasjson}
+                 modif = {this.props.modification}/>
             </div>
             
         )
     }
 }
-const mapDispatchToProps = {red, blue, erasor, text, circle, triangle, rectangle, downloadcanvas}
+const mapDispatchToProps = {red, blue, erasor, text, circle, triangle, rectangle, downloadcanvas, undo, redo}
 function mapStateToProps(state){
     console.log(state.erase)
     return ({"color": state.color,
@@ -106,7 +119,8 @@ function mapStateToProps(state){
             "rectangledimention": state.rectangledimention,
             "triangledimention": state.triangledimention,
             "circleradius": state.circleradius,
-            "canvasjson": state.downloadjson
+            "canvasjson": state.downloadjson,
+            "modification": state.modification
         })
     
 }
