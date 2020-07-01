@@ -1,13 +1,14 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import DrawingCanvas from './canvas'
-import {red, blue, erasor, text} from '../actions/action'
+import {red, blue, erasor, text, circle, rectangle, triangle, downloadcanvas} from '../actions/action'
 import Button from '@material-ui/core/Button';
 import Slider from '@material-ui/core/Button';
 class View extends Component{
     constructor(props){
         super(props)
-        this.color = null    
+        this.color = null
+        this.json = false
         this.penRed = () => {
             if(this.props.erase){
                 this.props.erasor()
@@ -25,6 +26,18 @@ class View extends Component{
         }
         this.addText = () => {
             this.props.text()
+        }
+        this.addTriangle = () => {
+            this.props.triangle()
+        }
+        this.addRectangle = () => {
+            this.props.rectangle()
+        }
+        this.addCircle = () => {
+            this.props.circle()
+        }
+        this.downloadJson = () => {
+            this.props.downloadcanvas()
         }
     }
     
@@ -51,25 +64,49 @@ class View extends Component{
                     <Button variant = "contained" onClick = {this.addText}>
                         Add Text
                     </Button>
+                    <Button variant = "contained" onClick = {this.addTriangle}>
+                        Add Triangle
+                    </Button>
+                    <Button variant = "contained" onClick = {this.addRectangle}>
+                        Add Rectangle
+                    </Button>
+                    <Button variant = "contained" onClick = {this.addCircle}>
+                        Add Circle
+                    </Button>
+                    <Button variant = "contained" onClick = {this.downloadJson}>
+                        Download JSON
+                    </Button>
                     
                 </div>
                 <div>
                     <Slider value = {50} aria-labelledby="continuous-slider" />
                 </div>
                 
-                <DrawingCanvas brushColor = {this.color} eraserColor = {this.props.erase} textarea = {this.props.textbox} actionperformed = {this.props.lastaction}/>
+                <DrawingCanvas
+                 brushColor = {this.color}
+                 eraserColor = {this.props.erase}
+                 textarea = {this.props.textbox}
+                 actionperformed = {this.props.lastaction}
+                 circleradius = {this.props.circleradius}
+                 rectangledim = {this.props.rectangledimention}
+                 triangledim = {this.props.triangledimention}
+                 jsondown = {this.props.canvasjson}/>
             </div>
             
         )
     }
 }
-const mapDispatchToProps = {red, blue, erasor, text}
+const mapDispatchToProps = {red, blue, erasor, text, circle, triangle, rectangle, downloadcanvas}
 function mapStateToProps(state){
     console.log(state.erase)
     return ({"color": state.color,
             "erase": state.erase,
             "textbox": state.textbox,
             "lastaction": state.lastaction,
+            "rectangledimention": state.rectangledimention,
+            "triangledimention": state.triangledimention,
+            "circleradius": state.circleradius,
+            "canvasjson": state.downloadjson
         })
     
 }
