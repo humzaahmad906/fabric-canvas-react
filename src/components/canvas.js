@@ -16,16 +16,10 @@ class DrawingCanvas extends Component{
             isDrawingMode: true,
         })
         this.canvas.on("object:added", (e)=>{
-            if ("id" in e.target){
-                console.log("redo")
-            }
-            else{
-                console.log(e.target)
+            if (!("id" in e.target)){
                 e.target.id = Math.random()
                 this.canvasobjects.push(e.target)
-                console.log("called")
             }
-            
         })
         this.canvas.renderAll()
     }
@@ -40,7 +34,6 @@ class DrawingCanvas extends Component{
                 number = number+this.rand()
             }
             return number}
-        // console.log("#"+this.three)
         switch(this.props.actionperformed){
             case ACTIVE_RED:
                 this.canvas.freeDrawingBrush.color = this.props.brushColor
@@ -94,11 +87,9 @@ class DrawingCanvas extends Component{
                 this.canvas.add(circle)
                 break
             case UNDO:
-                console.log(this.canvasobjects.length)
                 if (this.canvasobjects.length != 0){
                     let objectRemoved = this.canvasobjects[this.canvasobjects.length-1]
                     this.canvasobjects = this.canvasobjects.splice(0,this.canvasobjects.length-1)
-                    console.log("all objects", this.canvasobjects)
                     this.redopopulate.push(objectRemoved)
                     let i
                     for(i=0; i<this.canvas.getObjects().length; i++){
@@ -111,19 +102,13 @@ class DrawingCanvas extends Component{
                     }
                     this.canvas.renderAll()
                 }
-                
-                // console.log("canvasobjects", this.canvasobjects)
-                // console.log("redo", this.redopopulate)
+               
                 break
             case REDO:
                 if (this.redopopulate.length!=0){
                     let j
-                    console.log(this.canvasobjects.length)
                     let objectAdded = this.redopopulate.pop()
                     this.canvasobjects.push(objectAdded)
-                    console.log("all objects", this.canvasobjects)
-                    
-                    console.log("canvas objects", this.canvas.getObjects())
                     for(j=this.canvas.getObjects().length; j<this.canvasobjects.length; j++){
                         let obj = this.canvasobjects[j]
                         this.canvas.add(obj)

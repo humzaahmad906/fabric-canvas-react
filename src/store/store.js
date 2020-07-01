@@ -14,7 +14,6 @@ const DEFAULTSTATE = {
     "modification": []
 }
 const colorReducer = (state = "BLUE", action) => {
-    console.log(action.type)
     switch(action.type){
         case ACTIVE_RED:
             return "RED"
@@ -26,7 +25,6 @@ const colorReducer = (state = "BLUE", action) => {
     }
 }
 const eraserReducer = (state = false, action) => {
-    console.log(action.type)
     if(action.type === ACTIVE_ERASER){
         return !state
     }

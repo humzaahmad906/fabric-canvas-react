@@ -54,7 +54,6 @@ class View extends Component{
         else{
             this.color = "red"
         }
-        console.log(this.color)
         return(
             <div>
                 <div>
@@ -111,7 +110,6 @@ class View extends Component{
 }
 const mapDispatchToProps = {red, blue, erasor, text, circle, triangle, rectangle, downloadcanvas, undo, redo}
 function mapStateToProps(state){
-    console.log(state.erase)
     return ({"color": state.color,
             "erase": state.erase,
             "textbox": state.textbox,
