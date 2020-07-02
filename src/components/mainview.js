@@ -1,9 +1,11 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import DrawingCanvas from './canvas'
-import {red, blue, erasor, text, circle, rectangle, triangle, downloadcanvas, undo, redo} from '../actions/action'
+import Actions from '../actions/action'
+// import {red, blue, erasor, text, circle, rectangle, triangle, downloadCanvas, undo, redo} from '../actions/action'
 import Button from '@material-ui/core/Button';
 import Slider from '@material-ui/core/Button';
+let a = Actions
 class View extends Component{
     constructor(props){
         super(props)
@@ -14,6 +16,8 @@ class View extends Component{
                 this.props.erasor()
             }
             this.props.red()
+            console.log(this.props.red())
+            
         }
         this.penBlue = () => {
             if(this.props.erase){
@@ -37,7 +41,7 @@ class View extends Component{
             this.props.circle()
         }
         this.downloadJson = () => {
-            this.props.downloadcanvas()
+            this.props.downloadCanvas()
         }
         this.undo = () => {
             this.props.undo()
@@ -97,27 +101,28 @@ class View extends Component{
                  brushColor = {this.color}
                  eraserColor = {this.props.erase}
                  textarea = {this.props.textbox}
-                 actionperformed = {this.props.lastaction}
-                 circleradius = {this.props.circleradius}
-                 rectangledim = {this.props.rectangledimention}
-                 triangledim = {this.props.triangledimention}
-                 jsondown = {this.props.canvasjson}
+                 actionPerformed = {this.props.lastAction}
+                 circleRadius = {this.props.circleRadius}
+                 rectangleDim = {this.props.rectangleDimention}
+                 triangleDim = {this.props.triangleDimention}
+                 jsonDown = {this.props.canvasJson}
                  modif = {this.props.modification}/>
             </div>
             
         )
     }
 }
-const mapDispatchToProps = {red, blue, erasor, text, circle, triangle, rectangle, downloadcanvas, undo, redo}
+const red = a.red; const blue = a.blue; const erasor = a.erasor; const text = a.text; const circle = a.circle; const triangle = a.triangle; const rectangle = a.rectangle; const downloadCanvas = a.downloadCanvas; const undo = a.undo; const redo = a.redo;
+const mapDispatchToProps = {red, blue, erasor, text, circle, triangle, rectangle, downloadCanvas, undo, redo}
 function mapStateToProps(state){
     return ({"color": state.color,
             "erase": state.erase,
             "textbox": state.textbox,
-            "lastaction": state.lastaction,
-            "rectangledimention": state.rectangledimention,
-            "triangledimention": state.triangledimention,
-            "circleradius": state.circleradius,
-            "canvasjson": state.downloadjson,
+            "lastAction": state.lastAction,
+            "rectangleDimention": state.rectangleDimention,
+            "triangleDimention": state.triangleDimention,
+            "circleRadius": state.circleRadius,
+            "canvasJson": state.downloadJson,
             "modification": state.modification
         })
     
