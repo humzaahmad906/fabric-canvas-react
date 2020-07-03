@@ -13,12 +13,52 @@ class DrawingCanvas extends Component{
             height: 500,
             width: 500,
             backgroundColor: "black",
-            isDrawingMode: true,
+            isDrawingMode: false,
         })
+        this.drawing = false
+        this.objectOver = false
+        this.colorActive = false
         this.canvas.on("object:added", (e)=>{
+            e.target.selectable = true
             if (!("id" in e.target)){
                 e.target.id = Math.random()
                 this.canvasObjects.push(e.target)
+            }
+        })
+        this.canvas.on("mouse:down:before", (e) => {
+            try{
+                if(e.target.selectable ===false){
+                    this.canvas.isDrawingMode = true
+                }else{
+                    this.canvas.isDrawingMode = false
+                }
+            }catch(err){
+                if(this.drawing){
+                    this.canvas.isDrawingMode = true
+                }else{
+                    this.canvas.isDrawingMode = false
+                }
+                
+            }  
+        })
+        this.canvas.on("mouse:up", (e) => {
+            this.canvas.isDrawingMode = false
+            this.objectOver = true
+        })
+        this.canvas.on("mouse:over", (e) => {
+            try{
+                if(e.target.type === "path"){
+                    e.target.set({
+                        "selectable": false
+                    })
+                }
+                else{
+                    e.target.set({
+                        "selectable": true
+                    })
+                }
+            }catch(err){
+                console.log(err)
             }
         })
         this.canvas.renderAll()
@@ -35,20 +75,23 @@ class DrawingCanvas extends Component{
             }
             return number}
         switch(this.props.actionPerformed){
-            
             case Actions.ACTIVE_RED:
                 this.canvas.freeDrawingBrush.color = this.props.brushColor
+                this.drawing = true
                 break;
             case Actions.ACTIVE_BLUE:
                 this.canvas.freeDrawingBrush.color = this.props.brushColor
+                this.drawing = true
                 break;
             case Actions.ACTIVE_ERASER:
                 this.canvas.freeDrawingBrush.color = "black"
+                this.drawing = true
                 break;
             case Actions.TEXT_ADDED:
                 const text = new fabric.Textbox(this.props.textarea, {
                     "fill": "#"+this.three()
                 })
+                this.drawing = false
                 this.canvas.add(text)
                 break;
             case Actions.DOWNLOAD_ACTIVE:
@@ -67,6 +110,7 @@ class DrawingCanvas extends Component{
                     fill: '#'+this.three()
                 });
                 this.canvas.add(rectangle)
+                this.drawing = false
                 break
             case Actions.TRIANGLE_ADDED:
                 const triangle = new fabric.Triangle({ 
@@ -77,6 +121,7 @@ class DrawingCanvas extends Component{
                     fill: '#'+this.three(),
                 });
                 this.canvas.add(triangle)
+                this.drawing = false
                 break
             case Actions.CIRCLE_ADDED:
                 const circle = new fabric.Circle({radius: 100,
@@ -86,6 +131,7 @@ class DrawingCanvas extends Component{
                     top: 50, 
                 });
                 this.canvas.add(circle)
+                this.drawing = false
                 break
             case Actions.UNDO:
                 if (this.canvasObjects.length != 0){
