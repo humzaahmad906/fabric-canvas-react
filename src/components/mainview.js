@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import DrawingCanvas from './canvas'
+import DrawingCanvas from './canvass'
 import Actions from '../actions/action'
 // import {red, blue, erasor, text, circle, rectangle, triangle, downloadCanvas, undo, redo} from '../actions/action'
 import Button from '@material-ui/core/Button';

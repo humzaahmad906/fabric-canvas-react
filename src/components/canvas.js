@@ -5,8 +5,10 @@ import Actions from '../actions/action'
 class DrawingCanvas extends Component{
     constructor(props){
         super(props)
-        this.canvasObjects = []
-        this.redoPopulate = []
+        //stack based on undo list
+        this.undoStack = []
+        //stack based on redo
+        this.redoStack = []
     }
     componentDidMount(){
         this.canvas = new fabric.Canvas('c',{
@@ -14,16 +16,92 @@ class DrawingCanvas extends Component{
             width: 500,
             backgroundColor: "black",
             isDrawingMode: false,
+            stateful:true
         })
+        // this.counter = null
+        this.redoObject = false
+        this.totalLength = 0
+        this.objToAdd = null
+        this.stack = []
+        this.layer_no = null
         this.drawing = false
         this.objectOver = false
         this.colorActive = false
         this.canvas.on("object:added", (e)=>{
-            e.target.selectable = true
-            if (!("id" in e.target)){
-                e.target.id = Math.random()
-                this.canvasObjects.push(e.target)
+            
+            if (JSON.stringify(this.objToAdd).length>5){
+                console.log(this.objToAdd.allProperties)
+                console.log(JSON.stringify(this.objToAdd))
+                e.target.allProperties = []
+                for (let i=0; i<this.objToAdd.allProperties.length; i++){
+                    e.target.allProperties.push(this.objToAdd.allProperties.pop())
+                }
+                
+                e.target.counter = this.objToAdd.counter
+                this.objToAdd = null
             }
+            else{
+                if (!(e.target.alreadyAdded in e.target)){
+                    e.target.selectable = true
+                    if (!("id" in e.target)){
+                        e.target.id = Math.random()
+                        
+                    }
+                    
+                    if("recentAction" in e.target){
+                        if (e.target.recentAction === true){
+                            console.log("try")
+                            delete e.target.recentAction
+                        }
+                    }else{
+                        console.log(e.target.id)
+                        e.target.allProperties = [JSON.stringify(e.target)]
+                        e.target.counter = 0
+                        this.undoStack.push(JSON.stringify({"id": e.target.id, "props":e.target.allProperties}))
+                        
+                    }
+                
+                }
+            }
+            
+            
+        })
+        this.canvas.on("object:modified", (e)=>{
+            console.log("recentAction in e.target", "recentAction" in e.target)
+
+            if("recentAction" in e.target){
+                if (e.target.recentAction === true){
+                    console.log("phnch gya hai")
+                    delete e.target.recentAction
+                    e.target.setCoords()
+                    
+                    console.log(e.target.counter)
+                }
+            }else{
+                console.log("activeObject.counter>activeObject.allProperties.length-1")
+                e.target.counter++
+                e.target.allProperties.pop()
+                e.target.allProperties.push(JSON.stringify(e.target._stateProperties));
+                e.target.allProperties.push(JSON.stringify(e.target));
+                console.log(e.target._stateProperties)
+                console.log(e.target.allProperties)
+                this.undoStack.pop()
+                this.undoStack.push(JSON.stringify({"id": e.target.id, "props":e.target._stateProperties}))
+                this.undoStack.push(JSON.stringify({"id": e.target.id, "props":e.target}))
+            }
+            
+        })
+        this.canvas.on("object:removed", (e)=>{
+            if("recentAction" in e.target){
+                if (e.target.recentAction === true){
+                    delete e.target.recentAction
+                }
+            }else{
+                console.log("remove called")
+                e.target.counter--
+                // this.undoStack.push(JSON.stringify({"type":"removed","id": e.target.id, "object":e.target}))
+            }
+            
         })
         this.canvas.on("mouse:down:before", (e) => {
             try{
@@ -74,6 +152,7 @@ class DrawingCanvas extends Component{
                 number = number+this.rand()
             }
             return number}
+        let activeObject = null
         switch(this.props.actionPerformed){
             case Actions.ACTIVE_RED:
                 this.canvas.freeDrawingBrush.color = this.props.brushColor
@@ -134,40 +213,125 @@ class DrawingCanvas extends Component{
                 this.drawing = false
                 break
             case Actions.UNDO:
-                if (this.canvasObjects.length != 0){
-                    let objectRemoved = this.canvasObjects[this.canvasObjects.length-1]
-                    this.canvasObjects = this.canvasObjects.splice(0,this.canvasObjects.length-1)
-                    this.redoPopulate.push(objectRemoved)
-                    let i
-                    for(i=0; i<this.canvas.getObjects().length; i++){
-                        if (i<this.canvasObjects.length){
-                            this.canvas.getObjects()[i] = this.canvasObjects[i]
-                        }
-                        else{
-                            this.canvas.remove(this.canvas.getObjects()[i])
-                        }
+                activeObject = this.canvas.getActiveObject();
+                this.layer_no = this.canvas.getObjects().indexOf(activeObject)
+                
+                if(activeObject.counter >0){
+                    let oldProperties = JSON.parse(activeObject.allProperties[activeObject.counter-1])
+                    activeObject.recentAction = true
+                    for (let key in oldProperties){
+                        activeObject[key] = oldProperties[key]
                     }
+
+                    this.canvas.setActiveObject(activeObject)
+                    this.canvas.getActiveObject().setCoords();
+                    activeObject.counter--
                     this.canvas.renderAll()
                 }
-               
+                else if(activeObject.counter === 0){
+                    activeObject.counter--
+                    this.stack.push(JSON.stringify(activeObject))
+                    this.canvas.remove(activeObject)
+                    if (this.layer_no>0){
+                        this.canvas.setActiveObject(this.canvas.getObjects()[this.layer_no-1])
+                    }
+                }
                 break
             case Actions.REDO:
-                if (this.redoPopulate.length!=0){
-                    let j
-                    let objectAdded = this.redoPopulate.pop()
-                    this.canvasObjects.push(objectAdded)
-                    for(j=this.canvas.getObjects().length; j<this.canvasObjects.length; j++){
-                        let obj = this.canvasObjects[j]
-                        this.canvas.add(obj)
+                activeObject = this.canvas.getActiveObject();
+                this.layer_no = this.canvas.getObjects().indexOf(activeObject)
+                console.log(activeObject.allProperties)
+                if(activeObject.counter !== (activeObject.allProperties.length-1)){
+                    console.log("uper________________")
+                    let oldProperties = JSON.parse(activeObject.allProperties[activeObject.counter+1])
+                    activeObject.recentAction = true
+                    
+                    for (let key in oldProperties){
+                        activeObject[key] = oldProperties[key]
                     }
+
+                    this.canvas.setActiveObject(activeObject)
+                    this.canvas.getActiveObject().setCoords();
+                    activeObject.counter++
+                    this.canvas.renderAll()
+                }
+                else{
+                    console.log("nechay________________")
+                    // activeObject.counter++
+                    //condition to be added
+                    const objectPop = this.stack.pop()
+                    let nextObj = JSON.parse(objectPop)
+                    // push(JSON.stringify(activeObject))
+                    
+                    // push(JSON.stringify(activeObject))
+                    this.redoObject = true
+                    
+                    // console.log(nextObj.counter)
+                    this.objToAdd = nextObj
+                    let newObj = null
+                    switch (nextObj.type){
+                        case "rect":
+                            newObj = new fabric.Rect({ 
+                                width: 10, 
+                                height: 10, 
+                                left: 30, 
+                                top: 50, 
+                                fill: '#'+this.three(),
+                            });
+                            break;
+                        case "triangle":
+                            newObj = new fabric.Triangle({ 
+                                width: 10, 
+                                height: 10, 
+                                left: 30, 
+                                top: 50, 
+                                fill: '#'+this.three(),
+                            });
+                            break;
+                        case "circle":
+                            newObj = new fabric.Circle({radius: 100,
+                                fill: '#'+this.three(),
+                                radius: 10,
+                                left: 50, 
+                                top: 50, 
+                            })
+                            break;
+                        case "textbox":
+                            newObj = new fabric.Textbox("Dummy", {
+                                "fill": "#"+this.three()
+                            })
+                            break;
+                        default:
+                            console.log(nextObj.type)
                     }
-                
+                    console.log(nextObj.allProperties)
+                    for (let key in newObj){
+                        if (key in nextObj){
+                            newObj[key] = nextObj[key]
+                        }
+                        // console.log(key)
+                        // newObj[key] = nextObj[key]
+                    }
+                    for (let key in nextObj){
+                        
+                            newObj[key] = nextObj[key]
+                        
+                        // console.log(key)
+                        // newObj[key] = nextObj[key]
+                    }
+                    // console.log(newObj.setupState())
+                    this.canvas.add(newObj)
+                    // this.canvas.insertAt(nextObj,1)
+                    // this.canvas.renderAll()
+                    this.canvas.setActiveObject(this.canvas.getObjects()[this.canvas.getObjects().length-1])
+                    // this.canvas.getActiveObject().counter++
+                    // this.canvas.setActiveObject(this.canvas.getObjects().length-1)   
+                }
                 break
             default:
                 console.log(this.props.actionPerformed)
                 break
         }
-        
     }
     render(){
         
