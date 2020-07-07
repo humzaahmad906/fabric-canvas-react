@@ -322,7 +322,7 @@ class DrawingCanvas extends Component{
                     // console.log(newObj.setupState())
                     this.canvas.add(newObj)
                     // this.canvas.insertAt(nextObj,1)
-                    // this.canvas.renderAll()
+                    this.canvas.renderAll()
                     this.canvas.setActiveObject(this.canvas.getObjects()[this.canvas.getObjects().length-1])
                     // this.canvas.getActiveObject().counter++
                     // this.canvas.setActiveObject(this.canvas.getObjects().length-1)   
