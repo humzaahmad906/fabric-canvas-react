@@ -11,7 +11,7 @@ class DrawingCanvas extends Component{
         this.redoStack = []
     }
     componentDidMount(){
-        this.canvas = new fabric.Canvas('c',{
+        canvas = new fabric.Canvas('c',{
             height: 500,
             width: 500,
             backgroundColor: "black",
@@ -27,7 +27,7 @@ class DrawingCanvas extends Component{
         this.drawing = false
         this.objectOver = false
         this.colorActive = false
-        this.canvas.on("object:added", (e)=>{
+        canvas.on("object:added", (e)=>{
             
             if (JSON.stringify(this.objToAdd).length>5){
                 console.log(this.objToAdd.allProperties)
@@ -66,7 +66,7 @@ class DrawingCanvas extends Component{
             
             
         })
-        this.canvas.on("object:modified", (e)=>{
+        canvas.on("object:modified", (e)=>{
             console.log("recentAction in e.target", "recentAction" in e.target)
 
             if("recentAction" in e.target){
@@ -91,7 +91,7 @@ class DrawingCanvas extends Component{
             }
             
         })
-        this.canvas.on("object:removed", (e)=>{
+        canvas.on("object:removed", (e)=>{
             if("recentAction" in e.target){
                 if (e.target.recentAction === true){
                     delete e.target.recentAction
@@ -103,27 +103,27 @@ class DrawingCanvas extends Component{
             }
             
         })
-        this.canvas.on("mouse:down:before", (e) => {
+        canvas.on("mouse:down:before", (e) => {
             try{
                 if(e.target.selectable ===false){
-                    this.canvas.isDrawingMode = true
+                    canvas.isDrawingMode = true
                 }else{
-                    this.canvas.isDrawingMode = false
+                    canvas.isDrawingMode = false
                 }
             }catch(err){
                 if(this.drawing){
-                    this.canvas.isDrawingMode = true
+                    canvas.isDrawingMode = true
                 }else{
-                    this.canvas.isDrawingMode = false
+                    canvas.isDrawingMode = false
                 }
                 
             }  
         })
-        this.canvas.on("mouse:up", (e) => {
-            this.canvas.isDrawingMode = false
+        canvas.on("mouse:up", (e) => {
+            canvas.isDrawingMode = false
             this.objectOver = true
         })
-        this.canvas.on("mouse:over", (e) => {
+        canvas.on("mouse:over", (e) => {
             try{
                 if(e.target.type === "path"){
                     e.target.set({
@@ -139,7 +139,7 @@ class DrawingCanvas extends Component{
                 console.log(err)
             }
         })
-        this.canvas.renderAll()
+        canvas.renderAll()
     }
     componentDidUpdate(prevProps){
         this.rand = () => (
@@ -155,15 +155,15 @@ class DrawingCanvas extends Component{
         let activeObject = null
         switch(this.props.actionPerformed){
             case Actions.ACTIVE_RED:
-                this.canvas.freeDrawingBrush.color = this.props.brushColor
+                canvas.freeDrawingBrush.color = this.props.brushColor
                 this.drawing = true
                 break;
             case Actions.ACTIVE_BLUE:
-                this.canvas.freeDrawingBrush.color = this.props.brushColor
+                canvas.freeDrawingBrush.color = this.props.brushColor
                 this.drawing = true
                 break;
             case Actions.ACTIVE_ERASER:
-                this.canvas.freeDrawingBrush.color = "black"
+                canvas.freeDrawingBrush.color = "black"
                 this.drawing = true
                 break;
             case Actions.TEXT_ADDED:
@@ -171,10 +171,10 @@ class DrawingCanvas extends Component{
                     "fill": "#"+this.three()
                 })
                 this.drawing = false
-                this.canvas.add(text)
+                canvas.add(text)
                 break;
             case Actions.DOWNLOAD_ACTIVE:
-                let payload = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.canvas.toJSON()));
+                let payload = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(canvas.toJSON()));
                 let dlAnchorElem = document.createElement('a');
                 dlAnchorElem.setAttribute("href",payload);
                 dlAnchorElem.setAttribute("download", "canvas.json");
@@ -188,7 +188,7 @@ class DrawingCanvas extends Component{
                     top: 50, 
                     fill: '#'+this.three()
                 });
-                this.canvas.add(rectangle)
+                canvas.add(rectangle)
                 this.drawing = false
                 break
             case Actions.TRIANGLE_ADDED:
@@ -199,7 +199,7 @@ class DrawingCanvas extends Component{
                     top: 50, 
                     fill: '#'+this.three(),
                 });
-                this.canvas.add(triangle)
+                canvas.add(triangle)
                 this.drawing = false
                 break
             case Actions.CIRCLE_ADDED:
@@ -209,12 +209,12 @@ class DrawingCanvas extends Component{
                     left: 50, 
                     top: 50, 
                 });
-                this.canvas.add(circle)
+                canvas.add(circle)
                 this.drawing = false
                 break
             case Actions.UNDO:
-                activeObject = this.canvas.getActiveObject();
-                this.layer_no = this.canvas.getObjects().indexOf(activeObject)
+                activeObject = canvas.getActiveObject();
+                this.layer_no = canvas.getObjects().indexOf(activeObject)
                 
                 if(activeObject.counter >0){
                     let oldProperties = JSON.parse(activeObject.allProperties[activeObject.counter-1])
@@ -223,23 +223,23 @@ class DrawingCanvas extends Component{
                         activeObject[key] = oldProperties[key]
                     }
 
-                    this.canvas.setActiveObject(activeObject)
-                    this.canvas.getActiveObject().setCoords();
+                    canvas.setActiveObject(activeObject)
+                    canvas.getActiveObject().setCoords();
                     activeObject.counter--
-                    this.canvas.renderAll()
+                    canvas.renderAll()
                 }
                 else if(activeObject.counter === 0){
                     activeObject.counter--
                     this.stack.push(JSON.stringify(activeObject))
-                    this.canvas.remove(activeObject)
+                    canvas.remove(activeObject)
                     if (this.layer_no>0){
-                        this.canvas.setActiveObject(this.canvas.getObjects()[this.layer_no-1])
+                        canvas.setActiveObject(canvas.getObjects()[this.layer_no-1])
                     }
                 }
                 break
             case Actions.REDO:
-                activeObject = this.canvas.getActiveObject();
-                this.layer_no = this.canvas.getObjects().indexOf(activeObject)
+                activeObject = canvas.getActiveObject();
+                this.layer_no = canvas.getObjects().indexOf(activeObject)
                 console.log(activeObject.allProperties)
                 if(activeObject.counter !== (activeObject.allProperties.length-1)){
                     console.log("uper________________")
@@ -250,10 +250,10 @@ class DrawingCanvas extends Component{
                         activeObject[key] = oldProperties[key]
                     }
 
-                    this.canvas.setActiveObject(activeObject)
-                    this.canvas.getActiveObject().setCoords();
+                    canvas.setActiveObject(activeObject)
+                    canvas.getActiveObject().setCoords();
                     activeObject.counter++
-                    this.canvas.renderAll()
+                    canvas.renderAll()
                 }
                 else{
                     console.log("nechay________________")
@@ -320,12 +320,12 @@ class DrawingCanvas extends Component{
                         // newObj[key] = nextObj[key]
                     }
                     // console.log(newObj.setupState())
-                    this.canvas.add(newObj)
-                    // this.canvas.insertAt(nextObj,1)
-                    this.canvas.renderAll()
-                    this.canvas.setActiveObject(this.canvas.getObjects()[this.canvas.getObjects().length-1])
-                    // this.canvas.getActiveObject().counter++
-                    // this.canvas.setActiveObject(this.canvas.getObjects().length-1)   
+                    canvas.add(newObj)
+                    // canvas.insertAt(nextObj,1)
+                    canvas.renderAll()
+                    canvas.setActiveObject(canvas.getObjects()[canvas.getObjects().length-1])
+                    // canvas.getActiveObject().counter++
+                    // canvas.setActiveObject(canvas.getObjects().length-1)   
                 }
                 break
             default:

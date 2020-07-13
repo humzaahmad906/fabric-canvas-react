@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import {fabric} from 'fabric'
 import Actions from '../actions/action'
-
+import TextBoxLayout from './textbox/textbox'
 class DrawingCanvas extends Component{
     constructor(props){
         super(props)
@@ -414,6 +414,7 @@ class DrawingCanvas extends Component{
         return (
             <div style = {{"margin": "auto"}}>
                 <canvas id = 'c'></canvas>
+                <TextBoxLayout canvas = {this.canvas} />
             </div>
         )
     }
