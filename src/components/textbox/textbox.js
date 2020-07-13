@@ -82,11 +82,19 @@ class TextBoxLayout extends Component{
                         'color': 'red',
                         'blur': 5,
                     })
-                    this.props.canvas.getActiveObject().set({
-                        'shadow': shadow,
-                    })
+                    if (this.props.canvas.getActiveObject().shadow === null){
+                        this.props.canvas.getActiveObject().set({
+                            'shadow': shadow,
+                        })
+                    }
+                    else{
+                        this.props.canvas.getActiveObject().set({
+                            'shadow': null,
+                        })
+                    }
+                    
                     this.props.canvas.renderAll();
-                    console.log(shadow)
+                    
                 }
             }catch(err){
                 console.log(err)
