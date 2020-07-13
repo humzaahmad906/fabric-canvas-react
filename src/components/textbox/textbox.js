@@ -39,9 +39,16 @@ class TextBoxLayout extends Component{
         this.italic = (e) => {
             try{
                 if (this.props.canvas.getActiveObject().type === "textbox"){
-                    this.props.canvas.getActiveObject().set({
-                        "fontWeight": "italic",
-                    })
+                    if (this.props.canvas.getActiveObject().fontWeight !== "italic"){
+                        this.props.canvas.getActiveObject().set({
+                            "fontWeight": "italic",
+                        })
+                    }
+                    else{
+                        this.props.canvas.getActiveObject().set({
+                            "fontWeight": "normal",
+                        })
+                    }
                     this.props.canvas.renderAll();
                 }
             }catch(err){
@@ -51,10 +58,19 @@ class TextBoxLayout extends Component{
         }
         this.bold = (e) => {
             try{
+                
                 if (this.props.canvas.getActiveObject().type === "textbox"){
-                    this.props.canvas.getActiveObject().set({
-                        "fontWeight": "bold",
-                    })
+                    if (this.props.canvas.getActiveObject().fontWeight !== "bold"){
+                        this.props.canvas.getActiveObject().set({
+                            "fontWeight": "bold",
+                        });
+                    }
+                    else{
+                        this.props.canvas.getActiveObject().set({
+                            "fontWeight": "normal",
+                        });
+                    }
+                    
                     this.props.canvas.renderAll();
                  }
             }catch(err){
@@ -104,7 +120,7 @@ class TextBoxLayout extends Component{
         this.fill = () => {
             try{
                 if(this.props.canvas.getActiveObject().type === "textbox"){
-                    console.log(this.props.canvas.getActiveObject().textBackgroundColor)
+                    // console.log(this.props.canvas.getActiveObject().textBackgroundColor)
                     if (this.props.canvas.getActiveObject().textBackgroundColor === ""){
                         this.props.canvas.getActiveObject().set({
                             textBackgroundColor: 'white',
