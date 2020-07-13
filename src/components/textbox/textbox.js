@@ -9,6 +9,7 @@ import FontFaceObserver from 'fontfaceobserver';
 import {fabric} from 'fabric';
 import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/core/Slider';
+import { withTheme } from '@material-ui/core';
 class TextBoxLayout extends Component{
     constructor(props){
         super(props);
@@ -92,7 +93,6 @@ class TextBoxLayout extends Component{
                             'shadow': null,
                         })
                     }
-                    
                     this.props.canvas.renderAll();
                     
                 }
@@ -100,6 +100,26 @@ class TextBoxLayout extends Component{
                 console.log(err)
             }
             
+        }
+        this.fill = () => {
+            try{
+                if(this.props.canvas.getActiveObject().type === "textbox"){
+                    console.log(this.props.canvas.getActiveObject().textBackgroundColor)
+                    if (this.props.canvas.getActiveObject().textBackgroundColor === ""){
+                        this.props.canvas.getActiveObject().set({
+                            textBackgroundColor: 'white',
+                        });
+                    }
+                    else{
+                        this.props.canvas.getActiveObject().set({
+                            textBackgroundColor: "",
+                        });
+                    }
+                }
+            }catch(err){
+                console.log(err);
+            }
+            this.props.canvas.renderAll();
         }
     }
     
@@ -129,6 +149,9 @@ class TextBoxLayout extends Component{
                 </Button>
                 <Button variant = "contained" onClick = {this.shadow}>
                     Shadow
+                </Button>
+                <Button variant = "contained" onClick = {this.fill}>
+                    Fill
                 </Button>
                 <div>
                     <Typography id="discrete-slider" gutterBottom>
